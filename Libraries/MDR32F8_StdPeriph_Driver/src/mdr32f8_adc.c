@@ -88,7 +88,7 @@ void ADC_Init(ADCxControl* ADCx, const ADCx_InitTypeDef* ADC_InitStruct)
   uint32_t tmpreg_CONFIG0_MSK;	
   uint32_t tmpreg_CONFIG1_MSK;	
   uint32_t tmpreg_CONFIG2_MSK;		
-  uint32_t tmpreg_MSK;
+  //uint32_t tmpreg_MSK;
 
   assert_param(IS_ADC_START_DELAY_VALUE(ADC_InitStruct->ADC_StartDelay));
   assert_param(IS_ADC_TEMP_SENSOR_CONFIG(ADC_InitStruct->ADC_TempSensor));
@@ -181,11 +181,11 @@ ADCx_InitStruct->ADC_SETUP = 0;
 ADCx_InitStruct->ADC_PAUSE = 0;
 ADCx_InitStruct->ADC_ADCTRIM = 0;
 /* CONFIG2 */	
-ADCx_InitStruct->ADC_IE_NE = 0;
-ADCx_InitStruct->ADC_IE_OF = 0; 
-ADCx_InitStruct->ADC_IE_NAE = 0;
-ADCx_InitStruct->ADC_IE_AF = 0;
-ADCx_InitStruct->ADC_IE_ERFIN = 0;
+ADCx_InitStruct->ADC_IE_NE = DISABLE;
+ADCx_InitStruct->ADC_IE_OF = DISABLE; 
+ADCx_InitStruct->ADC_IE_NAE = DISABLE;
+ADCx_InitStruct->ADC_IE_AF = DISABLE;
+ADCx_InitStruct->ADC_IE_ERFIN = DISABLE;
 ADCx_InitStruct->ADC_LEVLCNTRL = 0; 
 ADCx_InitStruct->ADC_REFSEL = 0;
 ADCx_InitStruct->ADC_REF_TRIMR = 0;
@@ -342,36 +342,39 @@ FlagStatus ADC_GetFlagStatus(ADCxControl* ADCx, uint32_t Flag)
   *           @arg UART_CLKdiv8
   * @retval None
   */
-void ADC0_CLK_en(uint32_t ADC_CLKSRC, uint32_t ADC_CLK_DIV)
+//void ADC_CLK_en(uint32_t ADC_CLKSRC, uint32_t ADC_CLK_DIV)
+//{
+//  uint32_t tmpreg;
+//  /* Check the parameters */
+//  assert_param(IS_UART_ALL_PERIPH(UARTx));
+//	assert_param(IS_UART_CLKSRC(UART_CLKSRC));
+//     
+//  tmpreg = CLK_CNTR->ADC0_CLK;
+
+//  tmpreg &= ~(ADCx_DIV_Msk | ADCx_CLKSRC_msk);
+//  tmpreg |= (ADC_CLKSRC << ADCx_CLKSRC_offs) | ADCx_CLK_EN | ADC_CLK_DIV;
+//  
+//  CLK_CNTR->ADC0_CLK = tmpreg;
+//}
+
+void ADCx_CLK_en(ADCxControl* ADCx, uint32_t ADC_CLKSRC, uint32_t ADC_CLK_DIV)
 {
-  uint32_t tmpreg;
   /* Check the parameters */
   assert_param(IS_UART_ALL_PERIPH(UARTx));
 	assert_param(IS_UART_CLKSRC(UART_CLKSRC));
    
-  tmpreg = CLK_CNTR->ADC0_CLK;
-
-  tmpreg &= ~(ADCx_DIV_Msk | ADCx_CLKSRC_msk);
-  tmpreg |=  ADCx_CLK_EN | ADC_CLKSRC | (ADC_CLK_DIV<<ADCx_CLKSRC_offs);
-  
-  CLK_CNTR->ADC0_CLK = tmpreg;
+  if (ADCx == ADC0)
+  {  
+    CLK_CNTR->ADC0_CLK = 0;
+    CLK_CNTR->ADC0_CLK = (ADC_CLK_DIV<< ADCx_CLKSRC_offs) | ADCx_CLK_EN | ADC_CLKSRC;
+  }  
+  else
+  {  
+    CLK_CNTR->ADC1_CLK = 0;
+    CLK_CNTR->ADC1_CLK = (ADC_CLK_DIV<< ADCx_CLKSRC_offs) | ADCx_CLK_EN | ADC_CLKSRC;
+  }  
 }
 
-void ADC1_CLK_en(uint32_t ADC_CLKSRC, uint32_t ADC_CLK_DIV)
-{
-  uint32_t tmpreg;
-  __IO	uint32_t addr_ADCx_CLK;
-  /* Check the parameters */
-  assert_param(IS_UART_ALL_PERIPH(UARTx));
-	assert_param(IS_UART_CLKSRC(UART_CLKSRC));
-   
-  tmpreg = CLK_CNTR->ADC1_CLK;
-  
-  tmpreg &= ~(ADCx_DIV_Msk | ADCx_CLKSRC_msk);
-  tmpreg |=  ADCx_CLK_EN | ADC_CLKSRC | (ADC_CLK_DIV<<ADCx_CLKSRC_offs);
-
-  CLK_CNTR->ADC1_CLK = tmpreg;
-}
 
 /** @} */ /* End of group ADC_Private_Functions */
 

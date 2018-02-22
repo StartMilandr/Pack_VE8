@@ -233,8 +233,8 @@ void ADCx_Start(ADCxControl* ADCx);
 uint32_t ADCx_GetResult(ADCxControl* ADCx);
 uint32_t ADCx_GetStatus (ADCxControl* ADCx);
 FlagStatus ADC_GetFlagStatus(ADCxControl* ADCx, uint32_t Flag);
-void ADC0_CLK_en(uint32_t ADC_CLKSRC, uint32_t ADC_CLK_DIV);
-void ADC1_CLK_en(uint32_t ADC_CLKSRC, uint32_t ADC_CLK_DIV);
+//void ADC_CLK_en(uint32_t ADC_CLKSRC, uint32_t ADC_CLK_DIV);
+void ADCx_CLK_en(ADCxControl* ADCx, uint32_t ADC_CLKSRC, uint32_t ADC_CLK_DIV);
 
 /** @} */ /* End of group ADC_Exported_Functions */
 
