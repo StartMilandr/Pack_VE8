@@ -181,7 +181,7 @@ typedef struct {
 #define ADCx_CLKSRC_PLL0                    ((uint32_t)0x00000005)
 #define ADCx_CLKSRC_PLL1                    ((uint32_t)0x00000006)
 #define ADCx_CLKSRC_PLL2                    ((uint32_t)0x00000007)
-#define ADCx_CLKSRC_MAX_CLK                 ((uint32_t)0x0000000C)
+#define ADCx_CLKSRC_MAX_CLK                 ((uint32_t)0x0000000D)
 
 #define IS_ADCx_CLKSRC(CLKSRC)  					(((CLKSRC) == ADCx_CLKSRC_HSI)  || \
 																					 ((CLKSRC) == ADCx_CLKSRC_HSE0) || \

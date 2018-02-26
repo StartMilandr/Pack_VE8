@@ -366,12 +366,12 @@ void ADCx_CLK_en(ADCxControl* ADCx, uint32_t ADC_CLKSRC, uint32_t ADC_CLK_DIV)
   if (ADCx == ADC0)
   {  
     CLK_CNTR->ADC0_CLK = 0;
-    CLK_CNTR->ADC0_CLK = (ADC_CLK_DIV<< ADCx_CLKSRC_offs) | ADCx_CLK_EN | ADC_CLKSRC;
+    CLK_CNTR->ADC0_CLK = (ADC_CLKSRC<< ADCx_CLKSRC_offs) | ADCx_CLK_EN | ADC_CLK_DIV;    
   }  
   else
   {  
     CLK_CNTR->ADC1_CLK = 0;
-    CLK_CNTR->ADC1_CLK = (ADC_CLK_DIV<< ADCx_CLKSRC_offs) | ADCx_CLK_EN | ADC_CLKSRC;
+    CLK_CNTR->ADC1_CLK = (ADC_CLKSRC<< ADCx_CLKSRC_offs) | ADCx_CLK_EN | ADC_CLK_DIV;
   }  
 }
 
