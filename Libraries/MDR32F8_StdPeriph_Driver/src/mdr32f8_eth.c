@@ -137,7 +137,7 @@ void ETH_ClockDeInit(void)
   */
 void ETH_PHY_ClockConfig(uint32_t clock_source, uint32_t PHY_HCLKdiv)
 {
-	uint32_t tmpreg_EMAC_CLOCK;
+	//uint32_t tmpreg_EMAC_CLOCK;
 	uint32_t tmpreg_EPHY_CLOCK;
 	/* Check the parameters */
 	assert_param(IS_ETH_CLOCK_SOURCE(clock_source));
@@ -303,13 +303,13 @@ void ETH_StructInit(ETH_InitTypeDef * ETH_InitStruct)
 //	/* Set the working interface */
 //	ETH_InitStruct->ETH_PHY_Interface = ETH_PHY_INTERFACE_ETHERNET_802_3;
 
-	ETH_InitStruct->ETH_PHY_LB = 0;
+	ETH_InitStruct->ETH_PHY_LB = DISABLE;
 	
-	ETH_InitStruct->ETH_PHY_DLB = 0;
+	ETH_InitStruct->ETH_PHY_DLB = DISABLE;
 	
-	ETH_InitStruct->ETH_PHY_HALFD = 0;
+	ETH_InitStruct->ETH_PHY_HALFD = DISABLE;
 
-	ETH_InitStruct->ETH_PHY_EARLY_DV = 0;	
+	ETH_InitStruct->ETH_PHY_EARLY_DV = DISABLE;	
 	
 	ETH_InitStruct->ETH_PHY_DIR = 0;	
 	
@@ -569,6 +569,9 @@ void ETH_Init(MDR_ETH_TypeDef * ETHERNETx, ETH_InitTypeDef * ETH_InitStruct)
 	ETHERNETx->BAG = ETH_InitStruct->ETH_BAG;
 	/* Set jitter of packets transmitted. */
 	ETHERNETx->JITTERWND = ETH_InitStruct->ETH_JitterWnd;
+  
+	if (ETH_InitStruct->ETH_Buffer_Mode == ETH_BUFFER_MODE_FIFO)
+		ETH_DMAPrepare();  
 }
 
 /**
@@ -746,7 +749,7 @@ FlagStatus ETH_GetFlagStatus(MDR_ETH_TypeDef * ETHERNETx, uint16_t ETH_MAC_FLAG)
 	assert_param(IS_ETH_ALL_PERIPH(ETHERNETx));
 	assert_param(IS_ETH_MAC_FLAG(ETH_MAC_FLAG));
 
-	if(ETHERNETx->IFR & ETH_MAC_FLAG){
+	if(ETHERNETx->STAT & ETH_MAC_FLAG){
 		bitstatus = SET;
 	}
 	else{
@@ -910,6 +913,7 @@ uint16_t ETH_ReadPHYRegister(MDR_ETH_TypeDef * ETHERNETx, uint16_t PHYAddress, u
 	tmpreg = ETHERNETx->MDIO_CTRL;
 	/* Keep only the CSR Clock Range CR[2:0] bits value */
 	tmpreg &= ETH_MDIO_CTRL_DIV_Msk;
+  tmpreg &= ~(1 << ETH_MDIO_CTRL_OP_Pos);
 	/* Prepare the MII address register value */
 	tmpreg |= (uint32_t)(PHYAddress << 8) | (PHYReg << 0) | (1 << ETH_MDIO_CTRL_OP_Pos) | (1 << ETH_MDIO_CTRL_RDY_Pos) | (1 << ETH_MDIO_CTRL_PRE_EN_Pos) | (1<<5);
 	/* Write the result value into the MDIO_CTRL register */
@@ -993,6 +997,7 @@ uint32_t ETH_WritePHYRegister(MDR_ETH_TypeDef * ETHERNETx, uint16_t PHYAddress, 
   * @param	ptr_InputBuffer: pointer to buffer for reading input frame.
   * @retval	The status of the reading frame.
   */
+
 uint32_t ETH_ReceivedFrame(MDR_ETH_TypeDef * ETHERNETx, uint32_t * ptr_InputBuffer)
 {
 	ETH_StatusPacketReceptionTypeDef ETH_StatusPacketReceptionStruct;
@@ -1010,7 +1015,7 @@ uint32_t ETH_ReceivedFrame(MDR_ETH_TypeDef * ETHERNETx, uint32_t * ptr_InputBuff
 		case ETH_BUFFER_MODE_LINEAR:
 			Rhead = ETHERNETx->R_HEAD;
 			/* Set pointer to the status word reading message */
-			ptr_InputFrame = (uint32_t *)((EthBaseBufferAddr = ((uint32_t)ETHERNETx) + 0x08000000) + Rhead);
+			ptr_InputFrame = (uint32_t *)((EthBaseBufferAddr = ((uint32_t)ETHERNETx) + 0x00008000) + Rhead);
 			/* Read the status of the receiving a packet */
 			ETH_StatusPacketReceptionStruct.Status = (uint32_t)*ptr_InputFrame++;
 			PacketLength = (ETH_StatusPacketReceptionStruct.Fields.Length + 3)/4;
@@ -1043,7 +1048,7 @@ uint32_t ETH_ReceivedFrame(MDR_ETH_TypeDef * ETHERNETx, uint32_t * ptr_InputBuff
 		case ETH_BUFFER_MODE_AUTOMATIC_CHANGE_POINTERS:
 			/* Set the pointer to input frame */
 			Rhead = ETHERNETx->R_HEAD;
-			ptr_InputFrame = (uint32_t *)((EthBaseBufferAddr = ((uint32_t)ETHERNETx) + 0x08000000) + Rhead);
+			ptr_InputFrame = (uint32_t *)((EthBaseBufferAddr = ((uint32_t)ETHERNETx) + 0x00008000) + Rhead);
 			/* Read the status of the receiving a packet */
 			ETH_StatusPacketReceptionStruct.Status = (uint32_t)*ptr_InputFrame++;
 			/* Set the Length of receiving paket */
@@ -1074,7 +1079,7 @@ uint32_t ETH_ReceivedFrame(MDR_ETH_TypeDef * ETHERNETx, uint32_t * ptr_InputBuff
 		/* The buffer mode is FIFO */
 		case ETH_BUFFER_MODE_FIFO:
 			/* Set the pointer to input frame */
-			ptr_InputFrame = (uint32_t *) ((uint32_t)ETHERNETx + 0x08000000);
+			ptr_InputFrame = (uint32_t *) ((uint32_t)ETHERNETx + 0x00008000);
 			/* Read the status of the receiving a packet */
 			ETH_StatusPacketReceptionStruct.Status = (uint32_t)*ptr_InputFrame;
 			/* Set the Length of receiving paket */
@@ -1114,7 +1119,7 @@ void ETH_SendFrame(MDR_ETH_TypeDef * ETHERNETx, uint32_t * ptr_OutputBuffer, uin
 	switch (BufferMode){
 		case ETH_BUFFER_MODE_LINEAR:
 			/* Set pointer to output buffer */
-			ptr_OutputFrame = (uint32_t *)((((uint32_t)ETHERNETx) + 0x08000000) + Xtail);
+			ptr_OutputFrame = (uint32_t *)((((uint32_t)ETHERNETx) + 0x00008000) + Xtail);
 			/* Send frame */
 			EthReceiverFreeBufferSize = (ETH_BUFFER_SIZE - Xtail) / 4;
 			if(((BufLen +3)/4 + 1) < EthReceiverFreeBufferSize){
@@ -1127,7 +1132,7 @@ void ETH_SendFrame(MDR_ETH_TypeDef * ETHERNETx, uint32_t * ptr_OutputBuffer, uin
 					*ptr_OutputFrame++ = ptr_OutputBuffer[i];
 				}
 				tmp = i;
-				ptr_OutputFrame = (uint32_t *)((((uint32_t)ETHERNETx) + 0x08000000) + ETHERNETx->DILIMETR);
+				ptr_OutputFrame = (uint32_t *)((((uint32_t)ETHERNETx) + 0x00008000) + ETHERNETx->DILIMETR);
 				for(i = 0; i < (((BufLen + 3)/4 + 1) - EthReceiverFreeBufferSize); i++){
 					*ptr_OutputFrame++ = ptr_OutputBuffer[i+tmp];
 				}
@@ -1141,7 +1146,7 @@ void ETH_SendFrame(MDR_ETH_TypeDef * ETHERNETx, uint32_t * ptr_OutputBuffer, uin
 			break;
 		case ETH_BUFFER_MODE_AUTOMATIC_CHANGE_POINTERS:
 			/* Set pointer to output buffer */
-			ptr_OutputFrame = (uint32_t *)((((uint32_t)ETHERNETx) + 0x08000000) + Xtail);
+			ptr_OutputFrame = (uint32_t *)((((uint32_t)ETHERNETx) + 0x00008000) + Xtail);
 			/* Send frame */
 			EthReceiverFreeBufferSize = (ETH_BUFFER_SIZE - Xtail) / 4;
 			if(((BufLen +3)/4 + 2) < EthReceiverFreeBufferSize){
@@ -1154,7 +1159,7 @@ void ETH_SendFrame(MDR_ETH_TypeDef * ETHERNETx, uint32_t * ptr_OutputBuffer, uin
 					*ptr_OutputFrame++ = ptr_OutputBuffer[i];
 				}
 				tmp = i;
-				ptr_OutputFrame = (uint32_t *)((((uint32_t)ETHERNETx) + 0x08000000) + ETHERNETx->DILIMETR);
+				ptr_OutputFrame = (uint32_t *)((((uint32_t)ETHERNETx) + 0x00008000) + ETHERNETx->DILIMETR);
 				for(i = 0; i < (((BufLen + 3)/4 + 2) - EthReceiverFreeBufferSize); i++){
 					*ptr_OutputFrame++ = ptr_OutputBuffer[i+tmp];
 				}
@@ -1162,7 +1167,7 @@ void ETH_SendFrame(MDR_ETH_TypeDef * ETHERNETx, uint32_t * ptr_OutputBuffer, uin
 			break;
 		case ETH_BUFFER_MODE_FIFO:
 			/* Set the pointer to input frame */
-			ptr_OutputFrame = (uint32_t *) ((uint32_t)ETHERNETx + 0x08000004);
+			ptr_OutputFrame = (uint32_t *) ((uint32_t)ETHERNETx + 0x00008004);
 			/* Send frame */
 			ETH_DMAFrameTx(ptr_OutputFrame, ((BufLen+3)/4 + 2), ptr_OutputBuffer);
 			break;
@@ -1179,6 +1184,7 @@ void ETH_DMAPrepare(void)
 	DMA_CtrlDataInitTypeDef DMA_PriCtrlStr;
 	DMA_ChannelInitTypeDef DMA_InitStr;
 	
+  CLKCTRL_PER0_CLKcmd(CLKCTRL_PER0_CLK_MDR_DMA0_EN, ENABLE);
 	DMA_DeInit();
 	
 	DMA_StructInit(&DMA_InitStr);
@@ -1222,7 +1228,7 @@ void ETH_DMAFrameRx(uint32_t * DstBuf, uint32_t BufferSize, uint32_t *  SrcBuf)
 	ptrControltable = (uint32_t *)&DMA_ControlTable[DMA_Channel_SW1].DMA_Control;
 	/* Wait while DMA running */
 	while( 1 ){
-		tmpval = (*ptrControltable)&0x3;
+		tmpval = (*ptrControltable)&0x7;
 		if(tmpval == 0)
 			break;
 	}
@@ -1260,7 +1266,7 @@ void ETH_DMAFrameTx(uint32_t * DstBuf, uint32_t BufferSize, uint32_t * SrcBuf)
 	ptrControltable = (uint32_t *)&DMA_ControlTable[DMA_Channel_SW2].DMA_Control;
 	/* Wait while DMA running */
 	while( 1 ){
-		tmpval = (*ptrControltable)&0x3;
+		tmpval = (*ptrControltable)&0x7;
 		if(tmpval == 0)
 			break;
 	}

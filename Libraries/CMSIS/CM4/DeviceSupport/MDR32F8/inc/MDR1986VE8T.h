@@ -100,22 +100,52 @@ typedef enum IRQn
   PORTD_IRQn         		  = 86,
   PORTE_IRQn         		  = 87,
   PORTF_IRQn         		  = 88,	
-  DMA_IRQn         			  = 51,	
+  
+  ETH0_IRQn         		  = 89,
+  ETH1_IRQn         		  = 90,	
+  SPW0_IRQn        			  = 91,
+  SPW1_IRQn        			  = 92,
+  
   TMR0_IRQn         			= 93,
   TMR1_IRQn         			= 94,
   TMR2_IRQn         			= 95,
   TMR3_IRQn         			= 96,
+  TMR4_IRQn         			= 97,
+  TMR5_IRQn         			= 98,
+  
   CAN0_IRQn         			= 99,
+  CAN1_IRQn         			= 100,
+  CAN2_IRQn         			= 101,
+  CAN3_IRQn         			= 102,
+  CAN4_IRQn         			= 103,
+  
 	SSP0_IRQn         		  = 104,
+  SSP1_IRQn         		  = 105,
+  SSP2_IRQn         		  = 106,
+  SSP3_IRQn         		  = 107,
+  
   UART0_IRQn         		  = 108,	
+  UART1_IRQn         		  = 109,	
+  UART2_IRQn         		  = 110,	
+  UART3_IRQn         		  = 111,
+  
+  USB_IRQn         		    = 112,
+  
   ARC0_RX_IRQn         		= 113,
   ARC0_TX_IRQn        	 	= 114,	
+  ARC1_RX_IRQn         		= 115,
+  ARC1_TX_IRQn        	 	= 116,	  
+  
   MIL0_IRQn         			= 117,
   MIL1_IRQn         			= 118,
   ADC0_IRQn         			= 119,
   ADC1_IRQn         			= 120,
   DAC0_IRQn         			= 121,
   DAC1_IRQn         			= 122,
+  
+  CRYPTO_IRQn       			= 123,
+  CRC_IRQn       			    = 124,
+  ECC_IRQn       			    = 125,
 } IRQn_Type;
 
 
