@@ -404,9 +404,9 @@ void ETH_StructInit(ETH_InitTypeDef * ETH_InitStruct)
 	ETH_InitStruct->ETH_Hash_Table_Low	= 0x00000000;
 	ETH_InitStruct->ETH_Hash_Table_High = 0x08000000;
 
-	/* Set the pacet interval fo falf duplex mode. */
+	/* Set the pacet interval fo half duplex mode. */
 	ETH_InitStruct->ETH_IPG = 0x0060;
-	/* Set the prescaler increment values ??BAG and JitterWnd. */
+	/* Set the prescaler increment values for BAG and JitterWnd. */
 	ETH_InitStruct->ETH_PSC = 0x0031;
 	/* Set period the following of packages.*/
 	ETH_InitStruct->ETH_BAG = 0x0064;
@@ -913,7 +913,6 @@ uint16_t ETH_ReadPHYRegister(MDR_ETH_TypeDef * ETHERNETx, uint16_t PHYAddress, u
 	tmpreg = ETHERNETx->MDIO_CTRL;
 	/* Keep only the CSR Clock Range CR[2:0] bits value */
 	tmpreg &= ETH_MDIO_CTRL_DIV_Msk;
-  tmpreg &= ~(1 << ETH_MDIO_CTRL_OP_Pos);
 	/* Prepare the MII address register value */
 	tmpreg |= (uint32_t)(PHYAddress << 8) | (PHYReg << 0) | (1 << ETH_MDIO_CTRL_OP_Pos) | (1 << ETH_MDIO_CTRL_RDY_Pos) | (1 << ETH_MDIO_CTRL_PRE_EN_Pos) | (1<<5);
 	/* Write the result value into the MDIO_CTRL register */
@@ -969,6 +968,8 @@ uint32_t ETH_WritePHYRegister(MDR_ETH_TypeDef * ETHERNETx, uint16_t PHYAddress, 
 	tmpreg = ETHERNETx->MDIO_CTRL;
 	/* Keep only the CSR Clock Range CR[2:0] bits value */
 	tmpreg &= ~ETH_MDIO_CTRL_DIV_Msk;
+	
+	tmpreg &= ~(1 << ETH_MDIO_CTRL_OP_Pos);
 	/* Prepare the MII address register value */
 	tmpreg |= (uint32_t)(PHYAddress << 8) | (PHYReg << 0) | (0 << ETH_MDIO_CTRL_OP_Pos) | (1 << ETH_MDIO_CTRL_RDY_Pos) | (1 << ETH_MDIO_CTRL_PRE_EN_Pos) | (1<<5);
 	/* Give the value to the MII data register */
@@ -1196,6 +1197,7 @@ void ETH_DMAPrepare(void)
 	DMA_InitStr.DMA_SelectDataStructure = DMA_CTRL_DATA_PRIMARY;
 	/* Init DMA channel */
 	DMA_Init(DMA_Channel_SW1, &DMA_InitStr);
+  DMA_Init(DMA_Channel_SW2, &DMA_InitStr);
 }
 
 /**
