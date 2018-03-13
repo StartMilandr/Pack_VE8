@@ -819,6 +819,8 @@ void TIMER_ChnStructInit(TIMER_ChnInitTypeDef* TIMER_ChnInitStruct);
 #endif
 
 void TIM_CLK_en(uint32_t TIMx, uint32_t TIM_CLK_DIV);
+void  TIMER_BRGInit (MDR_TMR_TypeDef* TIMERx, uint32_t TIM_CLK_DIV);
+
 void TIMER_ChnETR_Cmd(MDR_TMR_TypeDef* TIMERx, uint32_t Channel, FunctionalState NewState);
 void TIMER_ChnETRResetConfig(MDR_TMR_TypeDef* TIMERx, uint32_t Channel, uint32_t NewState);
 void TIMER_ChnBRKResetConfig(MDR_TMR_TypeDef* TIMERx, uint32_t Channel, uint32_t NewState);

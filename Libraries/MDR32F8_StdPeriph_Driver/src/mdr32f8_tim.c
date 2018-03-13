@@ -1999,6 +1999,52 @@ void TIM_CLK_en(uint32_t TIMx, uint32_t TIM_CLK_DIV)
 	
 }
 
+void  TIMER_BRGInit (MDR_TMR_TypeDef* TIMERx, uint32_t TIM_CLK_DIV)
+{
+  uint32_t tmpreg;
+
+	if (TIMERx == MDR_TMR0){
+  tmpreg = CLK_CNTR->TIM0_CLK;
+
+  tmpreg |=  TIM_CLK_EN;
+  tmpreg &= ~TIM_DIV_Msk;
+  tmpreg |=  TIM_CLK_DIV;
+
+  CLK_CNTR->TIM0_CLK = tmpreg;
+	}
+	
+	if (TIMERx==MDR_TMR1){
+  tmpreg = CLK_CNTR->TIM1_CLK;
+
+  tmpreg |=  TIM_CLK_EN;
+  tmpreg &= ~TIM_DIV_Msk;
+  tmpreg |=  TIM_CLK_DIV;
+
+  CLK_CNTR->TIM1_CLK = tmpreg;
+	}
+	
+	if (TIMERx==MDR_TMR2){
+  tmpreg = CLK_CNTR->TIM2_CLK;
+
+  tmpreg |=  TIM_CLK_EN;
+  tmpreg &= ~TIM_DIV_Msk;
+  tmpreg |=  TIM_CLK_DIV;
+
+  CLK_CNTR->TIM2_CLK = tmpreg;
+	}
+	
+	if (TIMERx==MDR_TMR3){
+  tmpreg = CLK_CNTR->TIM3_CLK;
+
+  tmpreg |=  TIM_CLK_EN;
+  tmpreg &= ~TIM_DIV_Msk;
+  tmpreg |=  TIM_CLK_DIV;
+
+  CLK_CNTR->TIM3_CLK = tmpreg;
+	}
+
+}
+
 /** @} */ /* End of group TIMER_Private_Functions */
 
 /** @} */ /* End of group TIMER */
