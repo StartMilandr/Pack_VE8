@@ -266,7 +266,7 @@ void ETH_DeInit(MDR_ETH_TypeDef * ETHERNETx )
 	/* PHY reset */
 	ETH_PHY_Reset(ETHERNETx);
 
-	ETHERNETx->DILIMETR 	= 0x0800;
+	ETHERNETx->DILIMETR = 0x1000;
 	ETHERNETx->MAC_T 		= 0x78AB;
 	ETHERNETx->MAC_M 		= 0x3456;
 	ETHERNETx->MAC_H 		= 0x0012;
@@ -280,12 +280,13 @@ void ETH_DeInit(MDR_ETH_TypeDef * ETHERNETx )
 	ETHERNETx->JITTERWND 	= 0x0004;
 	ETHERNETx->R_CFG 		= 0x0507;
 	ETHERNETx->X_CFG 		= 0x01FA;
-	ETHERNETx->G_CFGl 		= 0x4080;
+	ETHERNETx->G_CFGl 	= 0x4080;
 	ETHERNETx->G_CFGh		= 0x3000;
 	ETHERNETx->IMR 			= 0x0000;
 	ETHERNETx->IFR 			= 0x0000;
-	ETHERNETx->R_HEAD 		= 0x0000;
-	ETHERNETx->X_TAIL 		= 0x0800;
+	ETHERNETx->R_HEAD 	= 0x0000;
+	ETHERNETx->X_TAIL 	= 0x1000;
+	ETHERNETx->STAT			= 0x0000;
 }
 
 /**
@@ -477,7 +478,7 @@ void ETH_Init(MDR_ETH_TypeDef * ETHERNETx, ETH_InitTypeDef * ETH_InitStruct)
 	assert_param(IS_FUNCTIONAL_STATE(ETH_InitStruct->ETH_Source_Addr_HASH_Filter));
 
 	/* Set the buffer size of transmitter and receiver */
-	//ETHERNETx->DILIMETR = ETH_InitStruct->ETH_Dilimiter;
+    ETHERNETx->DILIMETR = ETH_InitStruct->ETH_Dilimiter;
 
 //	/* Config the PHY control register */
 //	tmpreg_PHY_Control = (ETH_InitStruct->ETH_PHY_Address << ETH_PHY_CONTROL_PHYADD_Pos) | (ETH_InitStruct->ETH_PHY_Mode) | (ETH_InitStruct->ETH_PHY_Interface);
@@ -1005,6 +1006,7 @@ uint32_t ETH_ReceivedFrame(MDR_ETH_TypeDef * ETHERNETx, uint32_t * ptr_InputBuff
 	uint32_t PacketLength, i, Rhead, EthBaseBufferAddr, * ptr_InputFrame, tmp;
 	uint16_t BufferMode;
 	int32_t EthReceiverFreeBufferSize;
+    uint32_t RHead;  
 
 	/* Check the parameters */
 	assert_param(IS_ETH_ALL_PERIPH(ETHERNETx));
@@ -1044,6 +1046,12 @@ uint32_t ETH_ReceivedFrame(MDR_ETH_TypeDef * ETHERNETx, uint32_t * ptr_InputBuff
 			}
 			/* Set the new value of the ETH_R_Head register */
 			ETHERNETx->R_HEAD = ((uint32_t)ptr_InputFrame)&0x1FFF;
+      
+            RHead = ((uint32_t)ptr_InputFrame)&0x1FFF;
+            if (RHead < ETHERNETx->DILIMETR)
+              ETHERNETx->R_HEAD = RHead;
+            else
+              ETHERNETx->R_HEAD = 0;      
 			break;
 		/* The buffer mode is aoutomatic */
 		case ETH_BUFFER_MODE_AUTOMATIC_CHANGE_POINTERS:
@@ -1139,7 +1147,7 @@ void ETH_SendFrame(MDR_ETH_TypeDef * ETHERNETx, uint32_t * ptr_OutputBuffer, uin
 				}
 			}
 			ptr_OutputFrame++;
-			Xtail = (uint32_t)ptr_OutputFrame&0x1FFC;
+			Xtail = (uint32_t)ptr_OutputFrame&0x3FFC;
 			if(Xtail >= ETH_BUFFER_SIZE)
 				Xtail = ETHERNETx->DILIMETR;
 			/* Write the new value of the ETH_X_Tail register */
