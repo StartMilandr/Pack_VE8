@@ -130,10 +130,7 @@ void ARINC429R_DeInit()
 	ARINC429Rx->CONTROL5 = 0;
 	ARINC429Rx->CHANNEL  = 0;
 	ARINC429Rx->LABEL	 = 0;
-#if defined (USE_MDR1986VE3)
-	ARINC429Rx->CONTROL6 = 0;
-	ARINC429Rx->CONTROL7 = 0;
-#endif
+  ARINC429Rx->CONTROL9 = 0;
 }
 
 /**
@@ -168,10 +165,7 @@ void ARINC429R_ChannelInit(uint32_t ARINC429R_CHANNELx, ARINC429R_InitChannelTyp
 	uint32_t tmpreg_CONTROL3;
 	uint32_t tmpreg_CONTROL4;
 	uint32_t tmpreg_CONTROL5;
-#if defined (USE_MDR1986VE3)
-	uint32_t tmpreg_CONTROL6;
-	uint32_t tmpreg_CONTROL7;
-#endif
+  uint32_t tmpreg_CONTROL9;
 
 	/* Check the parameters */
 	assert_param(IS_ARINC429R_CHANNEL(ARINC429R_CHANNELx));
@@ -181,8 +175,9 @@ void ARINC429R_ChannelInit(uint32_t ARINC429R_CHANNELx, ARINC429R_InitChannelTyp
 	assert_param(IS_BIT_STATUS(ARINC429R_InitChannelStruct->ARINC429R_SDI1));
 	assert_param(IS_BIT_STATUS(ARINC429R_InitChannelStruct->ARINC429R_SDI2));
 	assert_param(IS_ARINC429R_DIV(ARINC429R_InitChannelStruct->ARINC429R_DIV));
-
-	ARINC429Rx = ARINC429R1;
+  assert_param(IS_FUNCTIONAL_STATE(ARINC429R_InitChannelStruct->ENSYNC));
+	
+  ARINC429Rx = ARINC429R1;
 
 	/* Set the speed of receiving data for specified ARINC429R_CHANNELx */
 	tmpreg_CONTROL1 = ARINC429Rx->CONTROL1;
@@ -226,25 +221,12 @@ void ARINC429R_ChannelInit(uint32_t ARINC429R_CHANNELx, ARINC429R_InitChannelTyp
 			tmpreg_CONTROL5 |= ARINC429R_InitChannelStruct->ARINC429R_DIV << ((ARINC429R_CHANNELx - ARINC429R_CHANNEL5)*8);
 			ARINC429Rx->CONTROL5 = tmpreg_CONTROL5;
 			break;
-#if defined (USE_MDR1986VE3)
-		case ARINC429R_CHANNEL9:
-		case ARINC429R_CHANNEL10:
-		case ARINC429R_CHANNEL11:
-		case ARINC429R_CHANNEL12:
-			tmpreg_CONTROL6 = ARINC429Rx->CONTROL6;
-			tmpreg_CONTROL6 &= ~(0xFF<<((ARINC429R_CHANNELx - ARINC429R_CHANNEL9)*8));
-			tmpreg_CONTROL6 |= ARINC429R_InitChannelStruct->ARINC429R_DIV << ((ARINC429R_CHANNELx - ARINC429R_CHANNEL9)*8);
-			ARINC429Rx->CONTROL6 = tmpreg_CONTROL6;
-			break;
-		case ARINC429R_CHANNEL13:
-		case ARINC429R_CHANNEL14:
-			tmpreg_CONTROL7 = ARINC429Rx->CONTROL7;
-			tmpreg_CONTROL7 &= ~(0xFF<<((ARINC429R_CHANNELx - ARINC429R_CHANNEL13)*8));
-			tmpreg_CONTROL7 |= ARINC429R_InitChannelStruct->ARINC429R_DIV << ((ARINC429R_CHANNELx - ARINC429R_CHANNEL13)*8);
-			ARINC429Rx->CONTROL7 = tmpreg_CONTROL7;
-			break;
-#endif
 	}
+
+  tmpreg_CONTROL9 = ARINC429Rx->CONTROL9;
+  tmpreg_CONTROL9 &= ~(0x01 << (ARINC429R_CHANNELx));
+  tmpreg_CONTROL9 |= (ARINC429R_InitChannelStruct->ARINC429R_ENSYNC << (ARINC429R_CHANNELx));
+  ARINC429Rx->CONTROL9 = tmpreg_CONTROL9;
 }
 
 void ARINC429R_Parity_en(uint32_t ARINC429T_CHANNELx, uint32_t ARINC429R_ODD_ADD, FunctionalState NewState)

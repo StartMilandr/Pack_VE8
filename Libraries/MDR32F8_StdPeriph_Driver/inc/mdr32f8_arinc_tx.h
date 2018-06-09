@@ -61,6 +61,9 @@ typedef struct {
 	uint32_t 		ARINC429T_DIV;			/*!< This member specifies the individual core
 											 	 frequency divider for channel reference frequency.
 											 	 This parameter is number from 0 to 0xFF. */
+    FunctionalState ARINC429T_ENSYNC;      /*!< This member enables or disables the ENSYNC  interface mode for a given channel.
+												 This parameter can be: ENABLE or DISABLE. */
+
 } ARINC429T_InitChannelTypeDef;
 
 /** @} */ /* End of group ARINC429T_Exported_Types */
