@@ -174,14 +174,25 @@ void DMA_CtrlDataInit(DMA_CtrlDataInitTypeDef *DMA_ctrl_data_ptr, DMA_CtrlDataTy
   * @param  None
   * @retval None
   */
+
+#define DMA_StartMilandr_Fix
+
 void DMA_DeInit(void)
 {
   MDR_DMA->CONFIG = 0;                           /* Master Enable Off */
   MDR_DMA->CTRL_BASE_PTR = 0;                 /* Control data base pointer */
   MDR_DMA->CHNL_SW_REQUEST = 0;               /* Disable all sw requests */
+  
+#ifndef DMA_StartMilandr_Fix
   MDR_DMA->CHNL_USEBURST_CLR = 0xFFFFFFFF;    /* Disable burst mode */
   MDR_DMA->CHNL_REQ_MASK_CLR = 0xFFFFFFFF;    /* Clear mask request */
   MDR_DMA->CHNL_ENABLE_CLR = 0xFFFFFFFF;      /* Clear channel enable */
+#else  
+  MDR_DMA->CHNL_USEBURST_SET = 0xFFFFFFFF;    /* Disable burst mode */ 
+  MDR_DMA->CHNL_REQ_MASK_SET = 0xFFFFFFFF;    /* Disable all channel*/  
+  MDR_DMA->CHNL_ENABLE_SET = 0xFFFFFFFF;      /* Clear channel enable */
+#endif  
+  
   MDR_DMA->CHNL_PRI_ALT_CLR = 0xFFFFFFFF;     /* Reset to primary data structure */
   MDR_DMA->CHNL_PRIORITY_CLR = 0xFFFFFFFF;    /* Reset to default priority */
   MDR_DMA->ERR_CLR = 0x01;                    /* Clear dma_err status */
