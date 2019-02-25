@@ -821,8 +821,9 @@ typedef struct
 #define EB_CNTR_ECCEN	    2
 #define EB_CNTR_EN	    1
 #define EB_CNTR_WS_HOLD(hold)  ((hold & 0xf) << 20)
-#define EB_CNTR_WS_ACTIVE(act) ((act & 0xf) << 16)
-#define EB_CNTR_WS_SETUP(setup) ((setup & 0xff) << 8)
+#define EB_CNTR_WS_SETUP(setup) ((setup & 0xf) << 16)
+#define EB_CNTR_WS_ACTIVE(act) ((act & 0xff) << 8)
+
 
 #define EBC_ECCEN_pos							1
 #define EBC_ECCMODE_pos						2
